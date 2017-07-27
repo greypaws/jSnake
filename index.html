@@ -5,12 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Walter's Snake</title>
+  <link rel="stylesheet" href="style/jSnake.css">
 </head>
 <body>
   <h1>Walter's Snake</h1>
-  <canvas id="canvas1" width="1024" height="512">
+  <h3>High Score: <strong id="highScore">000</strong></h3>
+  <h3>Score: <strong id="score">00</strong></h3>
+  <canvas id="canvas1" width="960" height="480">
         Your browser does not seem to support canvas! WTF?
   </canvas>
+  <div>
+    <button onclick="JSG.gameOver()">STOP</button>
+  </div>
   <p>
     <strong>Use the arrow keys to control the snake.</strong>
   </p>

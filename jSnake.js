@@ -6,24 +6,33 @@
 //one global variable to rule them all
 var JSG = {
   cvs: document.getElementById("canvas1"),
+  scoreEl: document.getElementById("score"),
+  highScoreEl: document.getElementById("highScore"),
   ctx: null, //JSG.cvs.getContext("2d"),
   width: 0, //JSG.cvs.width,
   height: 0, //JSG.cvs.height,
-  snake: [],
-  prey: {},
+  snake: [], //array of locations
+  prey: {}, //{x: x, y: y}
   snakeColor: "DimGrey",
   preyColor: "Brown",
-  square: 16, //size of the grid squares
-  gridHorz: 0, //Math.floor(JSG.width/JSG.square), //number of squares across
-  gridVert: 0, //Math.floor(JSG.height/JSG.square), //number of squares vertically
+  square: 24, //size of the grid squares, should evenly divide width and height
+  gridHorz: 0, //number of squares across
+  gridVert: 0, //number of squares vertically
   direction: "not", //set by arrow keys: north, south, east, and west
+  setIntId: "",
+  score: 0,
+  highScore: 0,
+  rate: 180, //number of milliseconds between snake movements
   ranLoc: null, //random location function
   drawSq: null, // draws squares that makes up snake and prey
   drawPrey: null,
   drawSnake: null,
   drawBorder: null,
-  setDirListener: null,
+  setDirListener: null, // listens for arrow keys to control snake
   slither: null, //moves snake
+  gameOver: null, //called when snake bites self
+  setStartListener: null, // listens for arrow keys to start snake moving
+  start: null,
   init: null //everything needed tp start
 };
 
@@ -38,8 +47,8 @@ JSG.ranLoc = function () {
 JSG.drawSq = function (gridLoc, type) {
   var x, y, size = JSG.square - 2,
     color = (type === "snake") ? JSG.snakeColor : JSG.preyColor;
-  x = gridLoc.x * JSG.square;
-  y = gridLoc.y * JSG.square;
+  x = (gridLoc.x * JSG.square) + 1;
+  y = (gridLoc.y * JSG.square) + 1;
   JSG.ctx.save();
   JSG.ctx.fillStyle = color;
   JSG.ctx.fillRect(x, y, size, size);
@@ -47,9 +56,9 @@ JSG.drawSq = function (gridLoc, type) {
 };
 
 JSG.clearSq = function (gridLoc) {
-  var x, y, size = JSG.square;
-  x = (gridLoc.x * JSG.square) - 1;
-  y = (gridLoc.y * JSG.square) - 1;
+  var x, y, size = JSG.square - 2;
+  x = (gridLoc.x * JSG.square) + 1;
+  y = (gridLoc.y * JSG.square) + 1;
   JSG.ctx.save();
   JSG.ctx.clearRect(x, y, size, size);
   JSG.ctx.restore();
@@ -87,7 +96,8 @@ JSG.drawBorder = function () {
 };
 
 JSG.setDirListener = function () {
-  var keycode = 0, 
+  var dir = "not",
+    keycode = 0, 
     KEY_CODES = {
       37: "left",
       38: "up",
@@ -99,13 +109,23 @@ JSG.setDirListener = function () {
     keycode = (e.keyCode) ? e.keyCode : e.charCode;
     if(KEY_CODES[keycode]) {
       e.preventDefault();
-      JSG.direction = KEY_CODES[keycode];
+      dir = KEY_CODES[keycode];
+    }
+    // can't reverse direction
+    if(!(dir === "left" && JSG.direction === "right") &&
+       !(dir === "right" && JSG.direction === "left") &&
+       !(dir === "up" && JSG.direction === "down") &&
+       !(dir === "down" && JSG.direction === "up")) {
+      JSG.direction = dir;
     }
   });
 };
 
 JSG.slither = function () {
-  var next = {}, 
+  var i, 
+    sn = JSG.snake.length,
+    next = {},
+    flag = true,
     head = JSG.snake[0];
   switch(JSG.direction) {
     case "left":
@@ -123,29 +143,83 @@ JSG.slither = function () {
     default:
       next = {x: head.x, y: head.y};
   }
+
+  //snake eats itself game over
+  for(i = 0; i < sn; i += 1) {
+    if(next.x === JSG.snake[i].x && next.y === JSG.snake[i].y) {
+      JSG.gameOver();
+      return;
+    }
+  }
   
   //remove and erase tail of snake unless the snake eats prey and grows
   if(!(next.x === JSG.prey.x && next.y === JSG.prey.y)) {
     JSG.clearSq(JSG.snake.pop());
+    flag = false;
   }
 
   JSG.drawSnake(next);
+  if(flag) {
+    JSG.drawPrey();
+    JSG.score += 10;
+    JSG.scoreEl.innerText = JSG.score;
+  }
+};
+
+JSG.gameOver = function () {
+  var timeout;
+  clearInterval(JSG.setIntId);
+  JSG.setIntId = "";
+  JSG.direction = "not";
+  timeout = function (locs) {
+    setTimeout(function () {
+      if(locs.length > 1) {
+        JSG.clearSq(locs.pop());
+        timeout(locs); 
+      } else {
+        if(JSG.highScore < JSG.score) {
+          JSG.highScore = JSG.score;
+          JSG.highScoreEl.innerText = JSG.highScore;
+        }
+        JSG.score = 0;
+      }
+    }, 200);
+  };
+  setTimeout(timeout, 1000, JSG.snake);
+};
+
+JSG.setStartListener = function () {
+  var keycode = null;
+  document.addEventListener("keyup", function(e) {
+    keycode = (e.keyCode) ? e.keyCode : e.charCode;
+    if(keycode && (keycode === 37 || keycode === 38 || keycode === 39 || keycode === 40) && (JSG.setIntId === "")) {
+      e.preventDefault();
+      JSG.start();
+    }
+  });
+};
+
+JSG.start = function () {
+  JSG.setIntId = setInterval(function () {
+    JSG.slither();
+  }, JSG.rate);
+  JSG.scoreEl.innerText = JSG.score;
 };
 
 JSG.init = function () {
   JSG.ctx = JSG.cvs.getContext("2d");
   JSG.width = JSG.cvs.width;
   JSG.height = JSG.cvs.height;
-  JSG.gridHorz = Math.floor(JSG.width/JSG.square);
-  JSG.gridVert = Math.floor(JSG.height/JSG.square);
+  JSG.gridHorz = Math.ceil(JSG.width/JSG.square) - 1;
+  JSG.gridVert = Math.ceil(JSG.height/JSG.square) - 1;
   JSG.drawBorder();
   JSG.drawSnake(JSG.ranLoc());
   JSG.drawPrey();
   JSG.setDirListener();
+  JSG.setStartListener();
 };
 
 window.onload = function () {
   JSG.init();
-  JSG.setDirListener();
 };
 
