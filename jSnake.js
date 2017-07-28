@@ -38,8 +38,8 @@ var JSG = {
 
 JSG.ranLoc = function () {
   var x, y, loc;
-  x = Math.floor(Math.random() * JSG.gridHorz);
-  y = Math.floor(Math.random() * JSG.gridVert);
+  x = Math.floor(Math.random() * (JSG.gridHorz + 1));
+  y = Math.floor(Math.random() * (JSG.gridVert + 1));
   loc = {x: x, y: y};
   return loc;
 };
@@ -169,7 +169,6 @@ JSG.slither = function () {
 JSG.gameOver = function () {
   var timeout;
   clearInterval(JSG.setIntId);
-  JSG.setIntId = "";
   JSG.direction = "not";
   timeout = function (locs) {
     setTimeout(function () {
@@ -182,6 +181,7 @@ JSG.gameOver = function () {
           JSG.highScoreEl.innerText = JSG.highScore;
         }
         JSG.score = 0;
+        JSG.setIntId = "";
       }
     }, 200);
   };
