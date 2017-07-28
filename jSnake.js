@@ -101,17 +101,12 @@ JSG.setDirListener = function () {
     KEY_CODES = {
       37: "left", // <-
       38: "up",
-<<<<<<< HEAD
       39: "right", //->
-      40: "down"
-=======
-      39: "right",
       40: "down",
       65 : "left",  // w
       87 : "up",    // a
       68 : "right", // d
-      83 : "down"   //s
->>>>>>> a8b53187355dc18652720847b2354bb2486ffe26
+      83 : "down"   // s
     };
 
   document.addEventListener("keydown", function(e) {
@@ -201,7 +196,7 @@ JSG.setStartListener = function () {
   var keycode = null;
   document.addEventListener("keyup", function(e) {
     keycode = (e.keyCode) ? e.keyCode : e.charCode;
-    if(keycode && (keycode === 37 || keycode === 38 || keycode === 39 || keycode === 40) && (JSG.setIntId === "")) {
+    if(keycode && (keycode === 37 || keycode === 38 || keycode === 39 || keycode === 40 || keycode === 65 || keycode === 87 || keycode === 68 || keycode === 83) && (JSG.setIntId === "")) {
       e.preventDefault();
       JSG.start();
     }
