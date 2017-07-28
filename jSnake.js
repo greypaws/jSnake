@@ -102,7 +102,11 @@ JSG.setDirListener = function () {
       37: "left",
       38: "up",
       39: "right",
-      40: "down"
+      40: "down",
+      65 : "left",  // w
+      87 : "up",    // a
+      68 : "right", // d
+      83 : "down"   //s
     };
 
   document.addEventListener("keydown", function(e) {
