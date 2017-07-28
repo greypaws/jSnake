@@ -101,8 +101,17 @@ JSG.setDirListener = function () {
     KEY_CODES = {
       37: "left", // <-
       38: "up",
+<<<<<<< HEAD
       39: "right", //->
       40: "down"
+=======
+      39: "right",
+      40: "down",
+      65 : "left",  // w
+      87 : "up",    // a
+      68 : "right", // d
+      83 : "down"   //s
+>>>>>>> a8b53187355dc18652720847b2354bb2486ffe26
     };
 
   document.addEventListener("keydown", function(e) {
