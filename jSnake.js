@@ -99,9 +99,9 @@ JSG.setDirListener = function () {
   var dir = "not",
     keycode = 0, 
     KEY_CODES = {
-      37: "left",
+      37: "left", // <-
       38: "up",
-      39: "right",
+      39: "right", //->
       40: "down"
     };
 
